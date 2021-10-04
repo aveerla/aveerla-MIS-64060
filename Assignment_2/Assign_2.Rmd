@@ -1,0 +1,175 @@
+---
+title: "Assign_2"
+author: "Anujeeth Veerla"
+date: 10/04/2021
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+library(dplyr)
+library(caret)
+library(ISLR)
+library(FNN)
+library(gmodels)
+library(dummies)
+library(readr)
+
+#Reading the CSV file to a variable univBank
+```{r}
+univBank <- read.CSV("UniversalBank.csv")
+
+#Removing ID and Zipcode columns
+
+Bank <- univBank[,c(-1,-5)]
+str(Bank)
+```
+
+#Create dummy for Education column
+```{r}
+Edu <- dummy(Bank$Education)
+tmp <- cbind(Bank, Edu)
+head(tmp)
+```
+#Removing education column
+```{r}
+UnBank <- tmp[c(-6)]
+head(UnBank)
+```
+
+#PArtitioning Data into Training 60% and Validation 40%
+```{r}
+set.seed(15)
+Index <-createDataPartition(UnBank$Income, p=0.6, list = FALSE)
+
+training_data <-UnBank[Index,]
+dim(training_data)
+
+validation_data<-UnBank[-Index,]
+dim(validation_data)
+```
+#Standardizing data using Normalization
+```{r}
+norm.model<-preProcess(training_data, method= c("center", "scale"))
+head(norm.model)
+train_nf<- predict(norm.model,training_data)
+validation_nf<- predict(norm.model,validation_data)
+total_nf<- predict(norm.model, UnBank)
+
+summary(total_nf)
+summary(train_nf)
+summary(validation_nf)
+
+set.seed(10)
+
+train_data<-train_nf[,-7]
+head(train_data)
+train_outcome<- factor(training_data[,7], levels= c(0,1), lables= c("reject", "accept"))
+head(train_outcome)
+valid_data<-validation_nf[,-7]
+head(valid_data)
+validation_outcome<- factor(validation_data[,7], levels = c(0,1), labels = c("reject", "accept"))
+head(validation_outcome)
+total_data<- total_nf[,-7]
+total_outcome<-factor(UnBank[,7], levels = c(0,1),labels = c("reject", "accept") )
+head(total_outcome)
+```
+# Q1.Age= 40, Experience = 10, Income=84, Family=2, CCAvg=2, Education_1=0, Education_2=1, Education_3=0, Mortgage=0, Securities account =0, CD Account = 0, Online=1, and Credit card = 1. PErform a k-NN Classification with all predictors except ID and ZIP code using k=1.Remember to transform categorical predictors with more than two categories into dummy variables first. Specify the success calss as 1 (loan acceptance), and use the default cutoff value of 0.5 . How would this customer be classifies?
+
+```{r}
+TestTrainData<-c(40,10,84,2,2,0,0,0,1,1,0,1,0)
+knn_Test<-knn(train_data, TestTrainData, cl=train_outcome, k=1,prob = TRUE)
+knn_Test
+```
+
+#2
+```{r}
+bestk<-data.frame(k=seq(1,55,1), accuracy=rep(0,55))
+head(bestk)
+for (i in 1:55) {
+  knn.pred<-knn(train_data,valid_data,cl=train_outcome,k=i)
+  bestk[i,2]<-confusionMatrix(knn.pred, validation_outcome)$overall[1]
+}
+head(bestk)
+bestk_fit<-bestk[which.max(bestk$accuracy),]
+bestk_fit
+```
+
+#Q3 
+```{r}
+knn.pred<-knn(train_data, valid_data, cl=train_outcome, k=bestk_fit$k, prob = TRUE)
+crosstable(validation_outcome,knn.pred)
+```
+#Q4
+```{r}
+TestTrainData <-c(40,10,84,2,2,0,0,0,1,1,0,1,0)
+Bestfitknn<-knn(train_data, TestTrainData, cl=train_outcome, k=bestk_fit$k, prob = TRUE)
+(Bestfitknn)
+#Using complete Data set
+Totalknn<- knn(train_data, total_data, cl=train_outcome, k=bestk_fit$k, prob = TRUE)
+CrossTable(total_outcome, Totalknn)
+```
+#Q5
+```{r}
+Index1<- createDataPartition(UnBank$Income, p=0.5, list = FALSE)
+training_data2 = UnBank[Index1,]
+RData <- UnBank[-Index1]
+Index2 <- createDataPartition(RData$Income, p=0.6, list = FALSE)
+validation_data2=RData[Index2,]
+Test_data2 <- RData[-Index2,]
+head(Test_data2)
+```
+#Normalizing data
+```{r}
+norm_value2<-preProcess(training_data2, method = c ("center", "scale"))
+train_nf2 <- predict(norm_value2, training_data2)
+validation_nf2 <- predict(norm_value2, validation_data2)
+testnf2 <- predict(norm_value2, Test_data2)
+total_nf2 <- predict(norm_value2, UnBank)
+train_data2 <- train_nf2[,-7]
+training_outcome2 <- factor(training_data2[,7], levels = c(0,1), labels = c("reject", "accept") )
+valid_data2 <- validation_nf2[,-7]
+validation_outcome2 <- factor(validation_data2[,7])
+TestTrainData2 <- testnf2[,-7]
+TestTrainOutcome2 <- factor(Test_data2[,7], levels = c(0,1), labels = c("reject", "accept"))
+TotalData2 <- total_nf2[,-7]
+TotalOutcome2 <- factor(UnBank[,7], levels = c(0,1), labels = c("Reject", "accept"))
+```
+#Applying KNN with optimum K value 4 to Training and validation set 
+```{r}
+KnnValid <- knn(train_data2, valid_data2, cl=training_outcome2, k=bestk_fit$k, prob = TRUE)
+CrossTable(validation_outcome2,KnnValid, prop.chisq) = FALSE
+```
+
+#Applying KNN with optimum K value 4 to training and test set
+```{r}
+knnTest <- knn(train_data2, TestTrainData2, cl=training_outcome2, k=bestk_fit$k, prob = TRUE)
+CrossTable(TestTrainOutcome2, knnTest, prop.chisq = FALSE)
+```
+
+#Applying KNN with optimum value 4 to entire data set
+```{r}
+KnnTotal <- knn(train_data2, TotalData2, cl=training_outcome2, k=bestk_fit$k, prob = TRUE)
+CrossTable(TotalOutcome2, KnnTotal, prop.chisq = FALSE)
+}
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
