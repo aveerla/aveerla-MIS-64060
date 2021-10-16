@@ -1,0 +1,132 @@
+---
+title: "Assignment3"
+Author: Anujeeth Veerla
+Date: 10/16/2021
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r }
+
+library(reshape2)
+library(gmodels)
+library(caret)
+library(ISLR)
+library(e1071)
+
+```
+
+```{r}
+#Read CSV file
+UnivBank <-read.csv("UniversalBank.CSV")
+```
+
+```{r}
+#Normalization
+UnivBank$Personal.Loan<-factor(UnivBank$Personal.Loan)
+UnivBank$Online<-factor(UnivBank$Online)
+UnivBank$CreditCard<-factor(UnivBank$CreditCard)
+```
+
+```{r}
+set.seed(10)
+#Spliting data into training 60% and validation 40%
+t.index <-sample(row.names(UnivBank), 0.6*dim(UnivBank)[1])
+validt.index <- setdiff(row.names(UnivBank), t.index)
+t.df <- UnivBank[t.index, ]
+validt.df <- UnivBank[validt.index, ]
+train <- UnivBank[t.index,]
+validtest <- UnivBank[t.index, ]
+```
+
+#A Create a pivot table for the training data with Online as a column variable, CC as a row variable, and Loan as a secondary row variable. The values inside the table should convey the count. In R use functions melt() and cast(), or function table(). In Python, use panda dataframe methods melt() and pivot().
+```{r}
+melt.bank <- melt(train, id=c("CreditCard", "Personal.Loan"),variable="Online")
+cast.bank <- dcast(melt.bank,CreditCard+Personal.Loan~Online)
+cast.bank[,c(1:2,14)]
+
+```
+
+#B Consider the task of classifying a customer who owns a bank credit card and is actively using online banking services. Looking at the pivot table, what is the probability that this customer will accept the loan offer? [This is the probability of loan acceptance (Loan = 1) conditional on having a bank credit card (CC = 1) and being an active user of online banking services (Online = 1)].
+```{r}
+x= table(train[,c(10,13,14)])
+y<-as.data.frame(x)
+y
+```
+#C Create two separate pivot tables for the training data. One will have Loan (rows) as a function of Online (columns) and the other will have Loan (rows) as a function of CC.
+#Creating pivot table for Loan (rows) as a function of Online (columns)
+```{r}
+table(train[,c(10,13)])
+```
+#Creating pivot table for Loan (rows) as a function of CC
+```{r}
+table(train[,c(10,14)])
+```
+#D Compute the following quantities [P(A | B) means “the probability ofA given B”]: i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the loan acceptors) ii. P(Online = 1 | Loan = 1) iii. P(Loan = 1) (the proportion of loan acceptors) iv. P(CC = 1 | Loan = 0) v. P(Online = 1 | Loan = 0) vi. P(Loan = 0)
+```{r}
+#i 
+P1 <-table(train[,c(14,10)])
+S1<- P1[2,2]/(P1[2,2]+P1[1,2])
+S1
+
+#ii
+P2 <- table(train[, c(13,10)])
+S2 <- P2[2,2]/(P2[2,2]+P2[1,2])
+S2
+
+#iii
+P3<-table(train[,10])
+S3<-P3[2]/(P3[2]+P3[1])
+S3
+
+#iv
+P4<-table(train[,c(14,10)])
+S4<-P4[2,1]/(P4[2,1]+P4[1,1])
+S4
+
+#v
+P5<-table(train[,c(13,10)])
+S5<-P5[2,1]/(P5[2,1]+P5[1,1])
+S5
+
+#vi
+P6<-table(train[,10])
+S6<-P6[1]/(P6[1]+P6[2])
+S6
+
+```
+#E Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC= 1, Online = 1).
+#NaiveBayesProbability= (S1*S2*S3)/[(S1*S2*S3)+(S4*S5*S6)]
+
+#F  Compare this value with the one obtained from the pivot table in (B). Which is a more accurate estimate?
+
+#G Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. Examine the model output on training data, and find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1). Compare this to the number you obtained in (E).
+
+#Naive Bayes on training data
+```{r}
+table(train[,c(10,13:14)])
+train_Naive<-train[,c(10,13:14)]
+UnivBank_NB<-naiveBayes(Personal.Loan~.,data = train_Naive)
+UnivBank_NB
+```
+
+#Confusion Matrix
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

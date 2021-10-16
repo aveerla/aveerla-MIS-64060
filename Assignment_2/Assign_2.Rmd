@@ -1,20 +1,23 @@
 ---
 title: "Assign_2"
 author: "Anujeeth Veerla"
-date: 10/04/2021
-output: html_document
+date: "10/04/2021"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+library(readr)
 library(dplyr)
 library(caret)
 library(ISLR)
 library(FNN)
 library(gmodels)
 library(dummies)
-library(readr)
+
 
 #Reading the CSV file to a variable univBank
 ```{r}
