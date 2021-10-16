@@ -77,28 +77,34 @@ table(train[,c(10,14)])
 P1 <-table(train[,c(14,10)])
 S1<- P1[2,2]/(P1[2,2]+P1[1,2])
 S1
-
+```
 #ii
+```{r}
 P2 <- table(train[, c(13,10)])
 S2 <- P2[2,2]/(P2[2,2]+P2[1,2])
 S2
-
+```
 #iii
+```{r}
 P3<-table(train[,10])
 S3<-P3[2]/(P3[2]+P3[1])
 S3
-
+P3
+```
 #iv
+```{r}
 P4<-table(train[,c(14,10)])
 S4<-P4[2,1]/(P4[2,1]+P4[1,1])
 S4
-
+```
 #v
+```{r}
 P5<-table(train[,c(13,10)])
 S5<-P5[2,1]/(P5[2,1]+P5[1,1])
 S5
-
+```
 #vi
+```{r}
 P6<-table(train[,10])
 S6<-P6[1]/(P6[1]+P6[2])
 S6
@@ -106,8 +112,11 @@ S6
 ```
 #E Use the quantities computed above to compute the naive Bayes probability P(Loan = 1 | CC= 1, Online = 1).
 #NaiveBayesProbability= (S1*S2*S3)/[(S1*S2*S3)+(S4*S5*S6)]
+#0.01849491/(0.01849491+0.15736368)=0.1051692
 
 #F  Compare this value with the one obtained from the pivot table in (B). Which is a more accurate estimate?
+
+#The value we got from pivot table is 0.092831 and the naive bayes is 0.1051692 and are almost similar. Pivot table value is more accurate. 
 
 #G Which of the entries in this table are needed for computing P(Loan = 1 | CC = 1, Online = 1)? Run naive Bayes on the data. Examine the model output on training data, and find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1). Compare this to the number you obtained in (E).
 
@@ -118,8 +127,6 @@ train_Naive<-train[,c(10,13:14)]
 UnivBank_NB<-naiveBayes(Personal.Loan~.,data = train_Naive)
 UnivBank_NB
 ```
-
-#Confusion Matrix
 
 ## Including Plots
 
