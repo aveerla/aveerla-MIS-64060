@@ -73,37 +73,37 @@ table(train[,c(10,14)])
 ```
 #D Compute the following quantities [P(A | B) means “the probability ofA given B”]: i. P(CC = 1 | Loan = 1) (the proportion of credit card holders among the loan acceptors) ii. P(Online = 1 | Loan = 1) iii. P(Loan = 1) (the proportion of loan acceptors) iv. P(CC = 1 | Loan = 0) v. P(Online = 1 | Loan = 0) vi. P(Loan = 0)
 ```{r}
-#i 
+#i P(CC = 1 | Loan = 1)
 P1 <-table(train[,c(14,10)])
 S1<- P1[2,2]/(P1[2,2]+P1[1,2])
 S1
 ```
-#ii
+#ii P(Online = 1 | Loan = 1)
 ```{r}
 P2 <- table(train[, c(13,10)])
 S2 <- P2[2,2]/(P2[2,2]+P2[1,2])
 S2
 ```
-#iii
+#iii P(Loan = 1)
 ```{r}
 P3<-table(train[,10])
 S3<-P3[2]/(P3[2]+P3[1])
 S3
 P3
 ```
-#iv
+#iv P(CC = 1 | Loan = 0)
 ```{r}
 P4<-table(train[,c(14,10)])
 S4<-P4[2,1]/(P4[2,1]+P4[1,1])
 S4
 ```
-#v
+#v P(Online = 1 | Loan = 0)
 ```{r}
 P5<-table(train[,c(13,10)])
 S5<-P5[2,1]/(P5[2,1]+P5[1,1])
 S5
 ```
-#vi
+#vi P(Loan = 0)
 ```{r}
 P6<-table(train[,10])
 S6<-P6[1]/(P6[1]+P6[2])
@@ -127,6 +127,7 @@ train_Naive<-train[,c(10,13:14)]
 UnivBank_NB<-naiveBayes(Personal.Loan~.,data = train_Naive)
 UnivBank_NB
 ```
+#Value obtained is 0.0983393 after running Naive bayes on data where as value from E is 0.1051692 which is almost similar. 
 
 ## Including Plots
 
