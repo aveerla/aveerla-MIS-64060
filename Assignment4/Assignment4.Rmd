@@ -1,0 +1,73 @@
+---
+title: "Assignment4"
+author: "Anujeeth Veerla"
+date: "04/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r }
+
+library(factoextra)
+#Reading CSV file into Pharma variable
+Pharma <- read.csv("Pharmaceuticals.csv")
+head(Pharma)
+#Taking the quantitative variables (1-9) to cluster 21 firms
+Pharma1<-Pharma[,3:11]
+head(Pharma1)
+#here, scaling quantitative variables
+Pharma2<-scale(Pharma1)
+#we use two methods to calculate K value
+#Calculating K value using Elbow method
+fviz_nbclust(Pharma2, kmeans, method = "wss") + geom_vline(xintercept = 2, linetype = 5) + labs(subtitle = "Elbow Method")
+#Calculating K value using Silhoutte method
+fviz_nbclust(Pharma2, kmeans, method = "silhouette") + labs(subtitle = "Silhouette Method")
+set.seed(1)
+k5<-kmeans(Pharma2, centers = 2, nstart = 25)
+k5$centers
+#Visualizing clusters
+fviz_cluster(k5, data=Pharma2)
+fit<-kmeans(Pharma2,2)
+#Getting mean values of quantitative variables
+aggregate(Pharma2, by=list(fit$cluster), FUN=mean)
+Pharma3<-data.frame(Pharma2, fit$cluster)
+Pharma3
+library(cluster)
+#Visualizing data
+clusplot(Pharma2, fit$cluster, color= TRUE, shades=TRUE, labels=2, lines=0)
+
+
+#b) Interpret the clusters with respect to the numerical variables used in forming the clusters.
+#Cluster 1 - 2, 3, 5,6,8, 9,12,14,18,20 
+#Cluster 2 -  1, 4,7,10,11,13,15,16,17,19, 21
+#Observing mean values of numerical variables
+#Cluster 1 has low Market_Cap, high Beta, high PE_Ratio, low ROE, low ROA, low Asset_Turnover, high leverage, high Rev_Growth low Net_PRofit_Margin
+#Cluster 2 has high Market_Cap, low Beta, low PE_Ratio, high ROE, high ROA,high Asset_Turnover, low leverage, low Rev_Growth, high Net_Profit_Margin
+
+
+
+# c) Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? (those not used in forming the clusters) 
+
+#Cluster 1 has mostly Moderate Buy recommendation 
+#Cluster 2 has HOld recommendation 
+
+# d) Provide an appropriate name for each cluster using any or all of the variables in the dataset. 
+
+#Cluster 1 - low capped companies
+#Cluster 2 - high market capped companies
+
+
+```
+
+
+
+
