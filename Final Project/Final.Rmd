@@ -1,0 +1,143 @@
+---
+title: "Final Project"
+author: "Anujeeth Veerla"
+date: "08/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Installing required libraries
+```{r}
+library(factoextra)
+library(tidyverse)
+library(cluster)
+```
+
+#Reading data from CSV file
+```{r}
+Countries<-read.csv("Country-data.csv")
+head(Countries)
+```
+
+#Removing categorical column and taking only numericals columns
+```{r}
+Countries_df<-as.data.frame(Countries)
+rownames(Countries_df)<-Countries_df[,1]
+head(Countries_df)
+```
+
+#Removing non-quantitative variable (country column which is the 1st column and taking 2to10 columns) from csv
+```{r}
+
+Countries_df<-Countries_df[,2:10]
+head(Countries_df)
+```
+
+#Now we're scaling the data which is having quantitative variables only
+```{r}
+
+Countries_scale<-scale(Countries_df)
+#Printing the scaled data
+head(Countries_scale)
+```
+
+#Calculate K value using Elbow and Silhouette method
+```{r}
+fviz_nbclust(Countries_scale,kmeans, method = "wss")+labs(subtitle = "Elbow Method")
+fviz_nbclust(Countries_scale,kmeans, method = "silhouette")+labs(subtitle = "Silhouette Method")
+set.seed(1)
+#Taking the K value as 3 and 25 iterations
+Kmeans3<-kmeans(Countries_scale, centers = 3, nstart = 25)
+Kmeans3$centers
+```
+
+#Visualizing the clusters
+```{r}
+fviz_cluster(Kmeans3, data = Countries_scale, main = "Clustering with K=3")
+fit<-kmeans(Countries_scale,3)
+```
+
+#Now, calculating the mean value of all quantitative variables to analyze the clusters
+```{r}
+aggregate(Countries_scale, by=list(fit$cluster), FUN=mean)
+FitData<-data.frame(Countries_scale,fit$cluster)
+FitData
+```
+
+
+#Filtering the countries which belongs to cluster 1 and displaying the results
+```{r}
+Group1<-filter(FitData,fit.cluster==1)
+#Viewing the list of countries in cluster1 which need immediate HELP
+Group1
+HelpNeededCountries<-Group1[,0]
+HelpNeededCountries
+```
+
+#Trying with K=4
+```{r}
+Kmeans4<-kmeans(Countries_scale, centers = 4, nstart = 25)
+Kmeans4$centers
+```
+
+#Visualizing the clusters when k=4
+```{r}
+library(cluster)
+fviz_cluster(Kmeans4, data = Countries_scale, main = "Clustering with K=4")
+fit4<-kmeans(Countries_scale,4)
+```
+
+
+#Calculating mean value for 4 clusters
+```{r}
+aggregate(Countries_scale, by=list(fit4$cluster), FUN=mean)
+FitData4<-data.frame(Countries_scale,fit4$cluster)
+FitData4
+```
+
+```{r}
+#Filtering the countries which belongs to cluster 3
+Group3<-filter(FitData4,fit4.cluster==3)
+#Viewing the list of countries in cluster3 which need immediate HELP
+Group3
+HelpNeededCountriesk3<-Group3[,0]
+HelpNeededCountriesk3
+```
+
+#Trying with K=5
+```{r}
+Kmeans5<-kmeans(Countries_scale, centers = 5, nstart = 25)
+Kmeans5$centers
+```
+
+#Visualizing the clusters when k=5
+```{r}
+fviz_cluster(Kmeans5, data = Countries_scale, main = "Clustering with K=5")
+fit5<-kmeans(Countries_scale,5)
+```
+
+
+#Calculating mean value for 5 clusters
+```{r}
+aggregate(Countries_scale, by=list(fit5$cluster), FUN=mean)
+FitData5<-data.frame(Countries_scale,fit5$cluster)
+FitData5
+```
+#Filtering the countries which belongs to cluster 1
+```{r}
+Group1<-filter(FitData5,fit5.cluster==1)
+#Viewing the list of countries in cluster1 which need immediate HELP
+Group1
+HelpNeededCountriesk5<-Group1[,0]
+HelpNeededCountriesk5
+```
+#Conclusion: After clustering with K=3,4,5 it seems 3 is the best fit. And in cluster 1, there are 47 countries which need immediate help. 
+
+
+
+
+
+
